@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"rememberApi/models"
 	"fmt"
+	"strconv"
 )
 
 type RememberController struct {
@@ -11,11 +12,22 @@ type RememberController struct {
 }
 
 func (c *RememberController) GetMemoryUserBooksByUid() {
-	intUid, err := c.GetInt("uid")
+	uid := c.Ctx.Input.Param(":uid")
+	intUid, err := strconv.Atoi(uid)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}
-	uid := uint32(intUid)
-	c.Data["json"] = models.GetMemoryUserBooksByUid(uid)
+	uintUid := uint32(intUid)
+	userBooks := models.GetMemoryUserBooksByUid(uintUid)
+	type rememberBooks struct {
+		models.UserBooks
+		PageNum int
+	}
+	rbs := []rememberBooks{}
+	for _, v := range userBooks{
+		pageNum := models.GetBooksPageNum(v.BooksId)
+		rbs = append(rbs, rememberBooks{UserBooks: *v, PageNum: pageNum})
+	}
+	c.Data["json"] = rbs
 	c.ServeJSON()
 }

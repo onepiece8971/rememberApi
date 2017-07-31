@@ -13,6 +13,7 @@ type Books struct {
 	Cover      string
 	Types      int
 	CreateUser uint32
+	PageNum    int
 	Base
 }
 
@@ -26,4 +27,14 @@ func GetBooks() []*Books {
 		fmt.Printf("ERR: %v\n", err)
 	}
 	return books
+}
+
+func GetBooksPageNum(id uint32) int {
+	o := orm.NewOrm()
+	book := Books{Id: id}
+	err := o.Read(&book)
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	}
+	return book.PageNum
 }

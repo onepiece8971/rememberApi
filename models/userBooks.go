@@ -11,6 +11,9 @@ type UserBooks struct {
 	Id          uint32
 	Uid         uint32
 	BooksId     uint32
+	Name        string
+	Cover       string
+	Info        string
 	IsMemory    string
 	UsedPages   int
 	PagesUptime int `orm:"size(10)"`
@@ -18,7 +21,7 @@ type UserBooks struct {
 }
 
 func GetMemoryUserBooksByUid(uid uint32) []*UserBooks {
-	userBooks := GetUserBooksByUid(uid, false)
+	userBooks := GetUserBooksByUid(uid, true)
 	return userBooks
 }
 

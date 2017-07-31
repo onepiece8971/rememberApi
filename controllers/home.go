@@ -13,8 +13,7 @@ type HomeController struct {
 func (c *HomeController) GetBooks() {
 	books := models.GetBooks()
 	var out []map[string]interface{}
-	var v *models.Books
-	for _, v  = range books {
+	for _, v := range books {
 		user := models.GetUserByUid(v.CreateUser)
 		book := map[string]interface{}{
 			"BookName": v.Name,
