@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"rememberApi/models"
 	"fmt"
+	"strconv"
 )
 
 type PostsController struct {
@@ -11,11 +12,12 @@ type PostsController struct {
 }
 
 func (c *PostsController) GetPostsByUserBooksId() {
-	id, err := c.GetInt("id")
+	id := c.Ctx.Input.Param(":id")
+	intId, err := strconv.Atoi(id)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}
-	ubId := uint32(id)
+	ubId := uint32(intId)
 	var posts []*models.Posts
 	userBook := models.GetUserBookById(ubId)
 	if userBook.PagesUptime != 0 {
