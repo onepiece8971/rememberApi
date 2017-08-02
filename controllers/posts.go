@@ -36,6 +36,41 @@ func (c *PostsController) GetPostsByUserBooksId() {
 	} else {
 		posts = models.GetPostsByBooksId(userBook.BooksId)
 	}
-	c.Data["json"] = posts
+	type result struct {
+		models.Posts
+		Level int
+	}
+	// 拼装level字段
+	if len(posts) > 0 {
+		postsIds := []uint32{}
+		for _, v := range posts {
+			postsIds = append(postsIds, v.Id)
+		}
+		recites := models.GetRecitesLevel(ubId, postsIds)
+		results := []result{}
+		for _, v := range posts {
+			results = append(results, result{Posts: *v, Level: recites[v.Id]})
+		}
+		c.Data["json"] = results
+	} else  {
+		c.Data["json"] = []result{}
+	}
+	c.ServeJSON()
+}
+
+func (c *PostsController) GetPostById() {
+	id := c.Ctx.Input.Param(":postId")
+	intId, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	}
+	postId := uint32(intId)
+	post := models.GetPostById(postId)
+	level := models.GetReciteLevel(postId)
+	type result struct {
+		models.Posts
+		Level int
+	}
+	c.Data["json"] = result{post, level}
 	c.ServeJSON()
 }

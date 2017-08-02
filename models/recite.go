@@ -33,6 +33,36 @@ func GetRecitePostsIdsByUbId(ubId uint32) []uint32 {
 	return postsIds
 }
 
+func GetRecitesByUbIdAndPostsIds(ubId uint32, postsIds []uint32) []*Recite {
+	o := orm.NewOrm()
+	recites := []*Recite{}
+	qs := o.QueryTable("recite")
+	_, err := qs.Filter("user_books_id", ubId).Filter("posts_id__in", postsIds).All(&recites)
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	}
+	return recites
+}
+
+func GetRecitesLevel(ubId uint32, postsIds []uint32) map[uint32]int {
+	recites := GetRecitesByUbIdAndPostsIds(ubId, postsIds)
+	levels := map[uint32]int{}
+	for _, v := range recites {
+		levels[v.PostsId] = v.Level
+	}
+	return levels
+}
+
+func GetReciteLevel(postsId uint32) int {
+	o := orm.NewOrm()
+	recite := Recite{PostsId: postsId}
+	err := o.Read(&recite)
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	}
+	return recite.Level
+}
+
 func AddRecite(ubId, postId uint32, level int) (id int64, err error) {
 	o := orm.NewOrm()
 	recite := Recite{

@@ -17,7 +17,7 @@ var LevelMap = map[int]int{
 
 func init() {
 	// register model
-	orm.RegisterModel(new(Books), new(UserBooks), new(Users), new(Posts), new(BooksHasPosts))
+	orm.RegisterModel(new(Books), new(UserBooks), new(Users), new(Posts), new(BooksHasPosts), new(Recite))
 
 	// set default database
 	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("database"))
