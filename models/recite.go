@@ -15,20 +15,25 @@ type Recite struct {
 	Base
 }
 
-func GetRecitePostsIdsByUbId(ubId uint32) []uint32 {
+func GetReciteByUbId(ubId uint32) []*Recite {
 	o := orm.NewOrm()
-	var recite []*Recite
+	var recites []*Recite
 	_, err := o.Raw(
-		"SELECT posts_id FROM recite WHERE user_books_id = ? AND `delete` = 0 AND level_time <> 0 AND (? - update_time) > level_time ORDER BY level",
+		"SELECT posts_id, level FROM recite WHERE user_books_id = ? AND `delete` = 0 AND level_time <> 0 AND (? - update_time) > level_time ORDER BY level",
 		ubId,
 		time.Now().Unix(),
-	).QueryRows(&recite)
-	postsIds := []uint32{}
-	for _, v := range recite {
-		postsIds = append(postsIds, v.PostsId)
-	}
+	).QueryRows(&recites)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
+	}
+	return recites
+}
+
+func GetRecitePostsIdsByUbId(ubId uint32) []uint32 {
+	recites := GetReciteByUbId(ubId)
+	postsIds := []uint32{}
+	for _, v := range recites {
+		postsIds = append(postsIds, v.PostsId)
 	}
 	return postsIds
 }
@@ -56,20 +61,20 @@ func GetRecitesLevel(ubId uint32, postsIds []uint32) map[uint32]int {
 func GetReciteLevel(postsId uint32) int {
 	o := orm.NewOrm()
 	recite := Recite{PostsId: postsId}
-	err := o.Read(&recite)
+	err := o.Read(&recite, "PostsId")
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}
 	return recite.Level
 }
 
-func AddRecite(ubId, postId uint32, level int) (id int64, err error) {
+func AddRecite(ubId, postId uint32) (id int64, err error) {
 	o := orm.NewOrm()
 	recite := Recite{
 		UserBooksId: ubId,
-		PostsId: postId,
-		Level: level,
-		LevelTime: LevelMap[level],
+		PostsId:     postId,
+		Level:       1,
+		LevelTime:   LevelMap[1],
 	}
 	now := int(time.Now().Unix())
 	recite.CreateTime = now

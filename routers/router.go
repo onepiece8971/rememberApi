@@ -9,7 +9,6 @@ package routers
 
 import (
 	"rememberApi/controllers"
-
 	"github.com/astaxie/beego"
 )
 
@@ -19,4 +18,5 @@ func init() {
 	beego.Router("/posts/:id", &controllers.PostsController{}, "*:GetPostsByUserBooksId")
 	beego.Router("/post/:postId", &controllers.PostsController{}, "*:GetPostById")
 	beego.Router("/recite/:id", &controllers.ReciteController{}, "*:GetRecitesByUserBooksId")
+	beego.Router("/addrecite/:ubId/:postId", &controllers.ReciteController{}, "*:AddRecite")
 }

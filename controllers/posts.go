@@ -11,6 +11,11 @@ type PostsController struct {
 	beego.Controller
 }
 
+type Review struct {
+	models.Posts
+	Level int
+}
+
 func (c *PostsController) GetPostsByUserBooksId() {
 	id := c.Ctx.Input.Param(":id")
 	intId, err := strconv.Atoi(id)
@@ -36,10 +41,6 @@ func (c *PostsController) GetPostsByUserBooksId() {
 	} else {
 		posts = models.GetPostsByBooksId(userBook.BooksId)
 	}
-	type result struct {
-		models.Posts
-		Level int
-	}
 	// 拼装level字段
 	if len(posts) > 0 {
 		postsIds := []uint32{}
@@ -47,13 +48,13 @@ func (c *PostsController) GetPostsByUserBooksId() {
 			postsIds = append(postsIds, v.Id)
 		}
 		recites := models.GetRecitesLevel(ubId, postsIds)
-		results := []result{}
+		results := []Review{}
 		for _, v := range posts {
-			results = append(results, result{Posts: *v, Level: recites[v.Id]})
+			results = append(results, Review{Posts: *v, Level: recites[v.Id]})
 		}
 		c.Data["json"] = results
 	} else  {
-		c.Data["json"] = []result{}
+		c.Data["json"] = []Review{}
 	}
 	c.ServeJSON()
 }
@@ -67,10 +68,6 @@ func (c *PostsController) GetPostById() {
 	postId := uint32(intId)
 	post := models.GetPostById(postId)
 	level := models.GetReciteLevel(postId)
-	type result struct {
-		models.Posts
-		Level int
-	}
-	c.Data["json"] = result{post, level}
+	c.Data["json"] = Review{post, level}
 	c.ServeJSON()
 }
