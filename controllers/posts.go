@@ -13,7 +13,8 @@ type PostsController struct {
 
 type Review struct {
 	models.Posts
-	Level int
+	ReciteId uint32
+	Level    int
 }
 
 func (c *PostsController) GetPostsByUserBooksId() {
@@ -50,7 +51,7 @@ func (c *PostsController) GetPostsByUserBooksId() {
 		recites := models.GetRecitesLevel(ubId, postsIds)
 		results := []Review{}
 		for _, v := range posts {
-			results = append(results, Review{Posts: *v, Level: recites[v.Id]})
+			results = append(results, Review{Posts: *v, ReciteId: recites[v.Id].Id, Level: recites[v.Id].Level})
 		}
 		c.Data["json"] = results
 	} else  {
@@ -60,14 +61,20 @@ func (c *PostsController) GetPostsByUserBooksId() {
 }
 
 func (c *PostsController) GetPostById() {
-	id := c.Ctx.Input.Param(":postId")
+	id := c.Ctx.Input.Param(":ubId")
 	intId, err := strconv.Atoi(id)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}
-	postId := uint32(intId)
-	post := models.GetPostById(postId)
-	level := models.GetReciteLevel(postId)
-	c.Data["json"] = Review{post, level}
+	ubId := uint32(intId)
+	postId := c.Ctx.Input.Param(":postId")
+	intPostId, postIdErr := strconv.Atoi(postId)
+	if err != nil {
+		fmt.Printf("ERR: %v\n", postIdErr)
+	}
+	uintPostId := uint32(intPostId)
+	post := models.GetPostById(uintPostId)
+	reciteId, level := models.GetReciteLevel(ubId, uintPostId)
+	c.Data["json"] = Review{post, reciteId, level}
 	c.ServeJSON()
 }

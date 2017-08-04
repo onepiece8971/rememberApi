@@ -19,16 +19,18 @@ func (c *ReciteController) GetRecitesByUserBooksId() {
 	}
 	uintId := uint32(intId)
 	recites := models.GetReciteByUbId(uintId)
-	postsIds := []uint32{}
-	levels := map[uint32]int{}
-	for _, v := range recites {
-		postsIds = append(postsIds, v.PostsId)
-		levels[v.PostsId] = v.Level
-	}
-	posts := models.GetPostsByIds(postsIds)
 	results := []Review{}
-	for _, v := range posts {
-		results = append(results, Review{Posts: *v, Level: levels[v.Id]})
+	if len(recites) > 0 {
+		postsIds := []uint32{}
+		levels := map[uint32]models.ReciteLevel{}
+		for _, v := range recites {
+			postsIds = append(postsIds, v.PostsId)
+			levels[v.PostsId] = models.ReciteLevel{Id: v.Id, Level: v.Level}
+		}
+		posts := models.GetPostsByIds(postsIds)
+		for _, v := range posts {
+			results = append(results, Review{Posts: *v, ReciteId: levels[v.Id].Id, Level: levels[v.Id].Level})
+		}
 	}
 	c.Data["json"] = results
 	c.ServeJSON()
@@ -53,4 +55,23 @@ func (c *ReciteController) AddRecite() {
 	}
 	c.Data["json"] = id
 	c.ServeJSON()
+}
+
+func (c *ReciteController) upLevel(isForget bool) {
+	intId, err := c.GetInt("id")
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	}
+	uintId := uint32(intId)
+	n := models.UpLevelById(uintId, isForget)
+	c.Data["json"] = n
+	c.ServeJSON()
+}
+
+func (c *ReciteController) Remember() {
+	c.upLevel(false)
+}
+
+func (c *ReciteController) Forget() {
+	c.upLevel(true)
 }

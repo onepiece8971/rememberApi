@@ -20,21 +20,17 @@ type UserBooks struct {
 	Base
 }
 
-func GetMemoryUserBooksByUid(uid uint32) []*UserBooks {
-	userBooks := GetUserBooksByUid(uid, true)
-	return userBooks
-}
-
-func GetUserBooksByUid(uid uint32, isMemory bool) []*UserBooks {
+func GetUserBooksByUid(uid uint32, isAll bool) []*UserBooks {
 	o := orm.NewOrm()
 	var userBooks []*UserBooks
 	qs := o.QueryTable("user_books")
-	_, err := qs.
-	Filter("delete", 0).
-	Filter("is_memory", isMemory).
-	Filter("uid", uid).
-		All(&userBooks)
-
+	qs = qs.Filter("delete", 0).Filter("uid", uid)
+	var err error
+	if isAll {
+		_, err = qs.All(&userBooks)
+	} else  {
+		_, err = qs.Filter("is_memory", true).All(&userBooks)
+	}
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}

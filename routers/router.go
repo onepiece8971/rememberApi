@@ -14,9 +14,12 @@ import (
 
 func init() {
 	beego.Router("/home", &controllers.HomeController{}, "*:GetBooks")
-	beego.Router("/remember/:uid", &controllers.RememberController{}, "*:GetMemoryUserBooksByUid")
+	beego.Router("/remember/:uid", &controllers.RememberController{}, "get:GetMemoryUserBooks")
+	beego.Router("/allRemember/:uid", &controllers.RememberController{}, "get:GetUserBooks")
 	beego.Router("/posts/:id", &controllers.PostsController{}, "*:GetPostsByUserBooksId")
-	beego.Router("/post/:postId", &controllers.PostsController{}, "*:GetPostById")
+	beego.Router("/post/:ubId/:postId", &controllers.PostsController{}, "*:GetPostById")
 	beego.Router("/recite/:id", &controllers.ReciteController{}, "*:GetRecitesByUserBooksId")
+	beego.Router("/remember", &controllers.ReciteController{}, "post:Remember")
+	beego.Router("/forget", &controllers.ReciteController{}, "post:Forget")
 	beego.Router("/addrecite/:ubId/:postId", &controllers.ReciteController{}, "*:AddRecite")
 }

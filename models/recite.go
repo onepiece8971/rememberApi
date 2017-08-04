@@ -15,11 +15,16 @@ type Recite struct {
 	Base
 }
 
+type ReciteLevel struct {
+	Id    uint32
+	Level int
+}
+
 func GetReciteByUbId(ubId uint32) []*Recite {
 	o := orm.NewOrm()
 	var recites []*Recite
 	_, err := o.Raw(
-		"SELECT posts_id, level FROM recite WHERE user_books_id = ? AND `delete` = 0 AND level_time <> 0 AND (? - update_time) > level_time ORDER BY level",
+		"SELECT id, posts_id, level FROM recite WHERE user_books_id = ? AND `delete` = 0 AND level_time <> 0 AND (? - update_time) > level_time ORDER BY level",
 		ubId,
 		time.Now().Unix(),
 	).QueryRows(&recites)
@@ -49,23 +54,26 @@ func GetRecitesByUbIdAndPostsIds(ubId uint32, postsIds []uint32) []*Recite {
 	return recites
 }
 
-func GetRecitesLevel(ubId uint32, postsIds []uint32) map[uint32]int {
+func GetRecitesLevel(ubId uint32, postsIds []uint32) (re map[uint32]ReciteLevel) {
 	recites := GetRecitesByUbIdAndPostsIds(ubId, postsIds)
-	levels := map[uint32]int{}
+	re = map[uint32]ReciteLevel{}
 	for _, v := range recites {
-		levels[v.PostsId] = v.Level
+		re[v.PostsId] = ReciteLevel{v.Id, v.Level}
 	}
-	return levels
+	return
 }
 
-func GetReciteLevel(postsId uint32) int {
+func GetReciteLevel(ubId uint32, postsId uint32) (reciteId uint32, level int) {
 	o := orm.NewOrm()
-	recite := Recite{PostsId: postsId}
-	err := o.Read(&recite, "PostsId")
+	recite := Recite{}
+	qs := o.QueryTable("recite")
+	err := qs.Filter("user_books_id", ubId).Filter("posts_id", postsId).One(&recite)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}
-	return recite.Level
+	reciteId = recite.Id
+	level = recite.Level
+	return
 }
 
 func AddRecite(ubId, postId uint32) (id int64, err error) {
@@ -81,4 +89,34 @@ func AddRecite(ubId, postId uint32) (id int64, err error) {
 	recite.UpdateTime = now
 	id, err = o.Insert(&recite)
 	return
+}
+
+func UpLevelById(id uint32, isForget bool) int64 {
+	o := orm.NewOrm()
+	recite := Recite{Id: id}
+	err := o.Read(&recite)
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	} else {
+		if isForget {
+			if recite.Level == 2 {
+				return 1
+			}
+			recite.Level = 2
+		} else {
+			if recite.Level >= 9 {
+				return 1
+			}
+			recite.Level = recite.Level + 1
+			if recite.Level > 9 {
+				recite.Level = 9
+			}
+		}
+		recite.LevelTime = LevelMap[recite.Level]
+		recite.UpdateTime = int(time.Now().Unix())
+		if num, err := o.Update(&recite, "Level", "LevelTime", "UpdateTime"); err == nil {
+			return num
+		}
+	}
+	return 0
 }

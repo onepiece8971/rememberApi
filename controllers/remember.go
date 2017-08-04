@@ -11,14 +11,14 @@ type RememberController struct {
 	beego.Controller
 }
 
-func (c *RememberController) GetMemoryUserBooksByUid() {
+func (c *RememberController) getUserBooksByUid(isAll bool) {
 	uid := c.Ctx.Input.Param(":uid")
 	intUid, err := strconv.Atoi(uid)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}
 	uintUid := uint32(intUid)
-	userBooks := models.GetMemoryUserBooksByUid(uintUid)
+	userBooks := models.GetUserBooksByUid(uintUid, isAll)
 	type rememberBooks struct {
 		models.UserBooks
 		PageNum int
@@ -30,4 +30,12 @@ func (c *RememberController) GetMemoryUserBooksByUid() {
 	}
 	c.Data["json"] = rbs
 	c.ServeJSON()
+}
+
+func (c *RememberController) GetUserBooks() {
+	c.getUserBooksByUid(true)
+}
+
+func (c *RememberController) GetMemoryUserBooks() {
+	c.getUserBooksByUid(false)
 }
