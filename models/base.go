@@ -1,6 +1,7 @@
 package models
 
 import (
+	_ "github.com/go-sql-driver/mysql" // import your used driver
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego"
 )
@@ -26,9 +27,6 @@ var LevelMap = map[int]int{
 }
 
 func init() {
-	// register model
-	orm.RegisterModel(new(Books), new(UserBooks), new(Users), new(Posts), new(BooksHasPosts), new(Recite))
-
 	// set default database
-	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("database"))
+	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("database") + "remember")
 }

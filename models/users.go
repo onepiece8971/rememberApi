@@ -1,7 +1,6 @@
 package models
 
 import (
-	_ "github.com/go-sql-driver/mysql" // import your used driver
 	"github.com/astaxie/beego/orm"
 	"fmt"
 )
@@ -13,6 +12,11 @@ type Users struct {
 	Password   string
 	Head       string
 	Base
+}
+
+func init() {
+	// register model
+	orm.RegisterModel(new(Users))
 }
 
 func GetUserByUid(uid uint32) Users {

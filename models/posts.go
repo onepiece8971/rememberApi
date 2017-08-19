@@ -20,6 +20,11 @@ type BooksHasPosts struct {
 	PostsId uint32
 }
 
+func init() {
+	// register model
+	orm.RegisterModel(new(Posts), new(BooksHasPosts))
+}
+
 func GetPostsByUserBooksId(ubId uint32) []*Posts {
 	o := orm.NewOrm()
 	var posts []*Posts

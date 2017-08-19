@@ -20,6 +20,11 @@ type ReciteLevel struct {
 	Level int
 }
 
+func init() {
+	// register model
+	orm.RegisterModel(new(Recite))
+}
+
 func GetReciteByUbId(ubId uint32) []*Recite {
 	o := orm.NewOrm()
 	var recites []*Recite

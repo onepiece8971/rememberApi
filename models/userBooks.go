@@ -1,7 +1,6 @@
 package models
 
 import (
-	_ "github.com/go-sql-driver/mysql" // import your used driver
 	"github.com/astaxie/beego/orm"
 	"fmt"
 	"time"
@@ -18,6 +17,11 @@ type UserBooks struct {
 	UsedPages   int
 	PagesUptime int `orm:"size(10)"`
 	Base
+}
+
+func init() {
+	// register model
+	orm.RegisterModel(new(UserBooks))
 }
 
 func GetUserBooksByUid(uid uint32, isAll bool) []*UserBooks {
