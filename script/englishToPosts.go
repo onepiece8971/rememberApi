@@ -9,6 +9,7 @@ import (
 	"time"
 	"strings"
 	"math"
+	"strconv"
 )
 
 type English struct {
@@ -57,14 +58,21 @@ func main() {
 			if jsonErr != nil {
 				fmt.Printf("jsonErr2: %v\n", jsonErr)
 			}
+			var newSentence []string
+			for i, one := range sentence {
+				if i == 0 || i == 3 || i == 6 {
+					newSentence = append(newSentence, strconv.Itoa(i / 3 + 1) + ". " + one)
+				} else if i == 1 || i == 4 || i == 7 {
+					newSentence = append(newSentence, one)
+				}
+			}
 			post := models.Posts{
 				Name: english.Name,
 				UserBooksId: 1,
 				Page: english.Id,
-				// todo 列句
-				Content: "# " + english.Name + "\n" + "#### " + english.Phsymbol + "<s>(" + english.Voice + ")\n<hide>" +
-					strings.Join(meaning, "\n") + "\n![images](" + english.Images + ")\n列句\n" + strings.Join(sentence, "\n") +
-					"</hide>",
+				Content: "# " + english.Name + "\n" + "#### " + english.Phsymbol + "<s>(" + english.Voice + ")\n<hide>\n" +
+					strings.Join(meaning, "\n") + "\n![images](" + english.Images + ")\n列句\n" + strings.Join(newSentence, "\n") +
+					"\n</hide>",
 			}
 			now := int(time.Now().Unix())
 			post.CreateTime = now

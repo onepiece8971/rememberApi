@@ -19,28 +19,33 @@ type Review struct {
 
 func (c *PostsController) GetPostsByUserBooksId() {
 	id := c.Ctx.Input.Param(":id")
+	page := c.Ctx.Input.Param(":page")
 	intId, err := strconv.Atoi(id)
 	if err != nil {
-		fmt.Printf("ERR: %v\n", err)
+		fmt.Printf("intIdERR: %v\n", err)
+	}
+	intPage, err := strconv.Atoi(page)
+	if err != nil {
+		fmt.Printf("intPageERR: %v\n", err)
 	}
 	ubId := uint32(intId)
 	var posts []*models.Posts
 	userBook := models.GetUserBookById(ubId)
 	if userBook.PagesUptime != 0 {
-		posts = models.GetPostsByUserBooksId(ubId)
+		posts = models.GetPostsByUserBooksId(ubId, intPage)
 		if len(posts) < userBook.UsedPages {
 			pages := []int{}
 			for _, v := range posts {
 				pages = append(pages, v.Page)
 			}
-			posts2 := models.GetPostsByBooksIdExcludePage(userBook.BooksId, pages)
+			posts2 := models.GetPostsByBooksIdExcludePage(userBook.BooksId, pages, intPage)
 			all := make([]*models.Posts, len(posts) + len(posts2))
 			copy(all, posts)
 			copy(all[len(posts):], posts2)
 			posts = all
 		}
 	} else {
-		posts = models.GetPostsByBooksId(userBook.BooksId)
+		posts = models.GetPostsByBooksId(userBook.BooksId, intPage)
 	}
 	// 拼装level字段
 	if len(posts) > 0 {

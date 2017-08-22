@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+const PostMax = 50
+
 type Posts struct {
 	Id          uint32
 	Name        string
@@ -25,12 +27,13 @@ func init() {
 	orm.RegisterModel(new(Posts), new(BooksHasPosts))
 }
 
-func GetPostsByUserBooksId(ubId uint32) []*Posts {
+func GetPostsByUserBooksId(ubId uint32, page int) []*Posts {
 	o := orm.NewOrm()
 	var posts []*Posts
 	qs := o.QueryTable("posts")
 	_, err := qs.Filter("delete", 0).
 		Filter("UserBooksId", ubId).
+		Limit(PostMax, PostMax * (page - 1)).
 		All(&posts)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
@@ -52,24 +55,25 @@ func GetPostsIdsByBooksId(bid uint32) (postsIds []uint32) {
 	return
 }
 
-func GetPostsByBooksId(bid uint32) []*Posts {
+func GetPostsByBooksId(bid uint32, page int) []*Posts {
 	o := orm.NewOrm()
 	postsIds := GetPostsIdsByBooksId(bid)
 	var posts []*Posts
 	qs := o.QueryTable("posts")
-	_, err := qs.Filter("id__in", postsIds).All(&posts)
+	_, err := qs.Filter("id__in", postsIds).Limit(PostMax, PostMax * (page - 1)).All(&posts)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}
 	return posts
 }
 
-func GetPostsByBooksIdExcludePage(bid uint32, pages []int) []*Posts {
+func GetPostsByBooksIdExcludePage(bid uint32, pages []int, page int) []*Posts {
 	o := orm.NewOrm()
 	postsIds := GetPostsIdsByBooksId(bid)
 	var posts []*Posts
 	qs := o.QueryTable("posts")
-	_, err := qs.Exclude("page__in", pages).Filter("id__in", postsIds).All(&posts)
+	_, err := qs.Exclude("page__in", pages).Filter("id__in", postsIds).
+		Limit(PostMax - len(pages), PostMax * (page - 1)).All(&posts)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
 	}
