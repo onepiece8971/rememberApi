@@ -4,7 +4,6 @@ import (
 	"github.com/astaxie/beego"
 	"rememberApi/models"
 	"fmt"
-	"strconv"
 )
 
 type ReciteController struct {
@@ -12,10 +11,9 @@ type ReciteController struct {
 }
 
 func (c *ReciteController) GetRecitesByUserBooksId() {
-	id := c.Ctx.Input.Param(":id")
-	intId, err := strconv.Atoi(id)
+	intId, err := c.GetInt(":id")
 	if err != nil {
-		fmt.Printf("ERR: %v\n", err)
+		fmt.Printf("idErr: %v\n", err)
 	}
 	uintId := uint32(intId)
 	recites := models.GetReciteByUbId(uintId)
@@ -37,18 +35,14 @@ func (c *ReciteController) GetRecitesByUserBooksId() {
 }
 
 func (c *ReciteController) AddRecite() {
-	ubId := c.Ctx.Input.Param(":ubId")
-	intUbId, err := strconv.Atoi(ubId)
+	uintUbId, err:= c.GetUint32(":ubId")
 	if err != nil {
-		fmt.Printf("ERR: %v\n", err)
+		fmt.Printf("ubIdErr: %v\n", err)
 	}
-	uintUbId := uint32(intUbId)
-	postId := c.Ctx.Input.Param(":postId")
-	intPostId, postIdErr := strconv.Atoi(postId)
-	if postIdErr != nil {
-		fmt.Printf("ERR: %v\n", postIdErr)
+	uintPostId, err := c.GetUint32(":postId")
+	if err != nil {
+		fmt.Printf("postIdErr: %v\n", err)
 	}
-	uintPostId := uint32(intPostId)
 	id, addErr := models.AddRecite(uintUbId, uintPostId)
 	if addErr != nil {
 		fmt.Printf("ERR: %v\n", addErr)

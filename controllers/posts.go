@@ -65,6 +65,21 @@ func (c *PostsController) GetPostsByUserBooksId() {
 	c.ServeJSON()
 }
 
+func (c *PostsController) GetPostByUbIdAndPage() {
+	ubId, err := c.GetUint32(":ubId")
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	}
+	pageId, err := c.GetInt(":pageId")
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	}
+	post := models.GetPostByUbIdPage(ubId, pageId)
+	reciteId, level := models.GetReciteLevel(ubId, post.Id)
+	c.Data["json"] = Review{post, reciteId, level}
+	c.ServeJSON()
+}
+
 func (c *PostsController) GetPostById() {
 	id := c.Ctx.Input.Param(":ubId")
 	intId, err := strconv.Atoi(id)

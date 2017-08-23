@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const ReciteMax = 10
+
 type Recite struct {
 	Id          uint32
 	UserBooksId uint32
@@ -29,9 +31,12 @@ func GetReciteByUbId(ubId uint32) []*Recite {
 	o := orm.NewOrm()
 	var recites []*Recite
 	_, err := o.Raw(
-		"SELECT id, posts_id, level FROM recite WHERE user_books_id = ? AND `delete` = 0 AND level_time <> 0 AND (? - update_time) > level_time ORDER BY level",
+		"SELECT id, posts_id, level FROM recite " +
+			"WHERE user_books_id = ? AND `delete` = 0 AND level_time <> 0 AND (? - update_time) > level_time " +
+			"ORDER BY level LIMIT ?",
 		ubId,
 		time.Now().Unix(),
+		ReciteMax,
 	).QueryRows(&recites)
 	if err != nil {
 		fmt.Printf("ERR: %v\n", err)
@@ -74,7 +79,7 @@ func GetReciteLevel(ubId uint32, postsId uint32) (reciteId uint32, level int) {
 	qs := o.QueryTable("recite")
 	err := qs.Filter("user_books_id", ubId).Filter("posts_id", postsId).One(&recite)
 	if err != nil {
-		fmt.Printf("ERR: %v\n", err)
+		return
 	}
 	reciteId = recite.Id
 	level = recite.Level
@@ -88,6 +93,10 @@ func AddRecite(ubId, postId uint32) (id int64, err error) {
 		PostsId:     postId,
 		Level:       1,
 		LevelTime:   LevelMap[1],
+	}
+	if readErr := o.Read(&recite, "user_books_id", "posts_id"); readErr == nil {
+		id, err = int64(recite.Id), nil
+		return
 	}
 	now := int(time.Now().Unix())
 	recite.CreateTime = now
@@ -104,9 +113,6 @@ func UpLevelById(id uint32, isForget bool) int64 {
 		fmt.Printf("ERR: %v\n", err)
 	} else {
 		if isForget {
-			if recite.Level == 2 {
-				return 1
-			}
 			recite.Level = 2
 		} else {
 			if recite.Level >= 9 {
