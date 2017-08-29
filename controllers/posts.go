@@ -28,6 +28,9 @@ func (c *PostsController) GetPostsByUserBooksId() {
 	if err != nil {
 		fmt.Printf("intPageERR: %v\n", err)
 	}
+	if intPage == 0 {
+		intPage = 1
+	}
 	ubId := uint32(intId)
 	var posts []*models.Posts
 	userBook := models.GetUserBookById(ubId)
@@ -54,9 +57,9 @@ func (c *PostsController) GetPostsByUserBooksId() {
 			postsIds = append(postsIds, v.Id)
 		}
 		recites := models.GetRecitesLevel(ubId, postsIds)
-		results := []Review{}
+		results := map[int]Review{}
 		for _, v := range posts {
-			results = append(results, Review{Posts: *v, ReciteId: recites[v.Id].Id, Level: recites[v.Id].Level})
+			results[v.Page] = Review{Posts: *v, ReciteId: recites[v.Id].Id, Level: recites[v.Id].Level}
 		}
 		c.Data["json"] = results
 	} else  {
@@ -77,6 +80,22 @@ func (c *PostsController) GetPostByUbIdAndPage() {
 	post := models.GetPostByUbIdPage(ubId, pageId)
 	reciteId, level := models.GetReciteLevel(ubId, post.Id)
 	c.Data["json"] = Review{post, reciteId, level}
+	c.ServeJSON()
+}
+
+func (c *PostsController) GetPostByUbIdName() {
+	ubId, err := c.GetUint32(":ubId")
+	if err != nil {
+		fmt.Printf("ERR: %v\n", err)
+	}
+	name := c.GetString(":name")
+	post, err := models.GetPostByUbIdName(ubId, name)
+	if err == nil {
+		reciteId, level := models.GetReciteLevel(ubId, post.Id)
+		c.Data["json"] = Review{post, reciteId, level}
+	} else {
+		c.Data["json"] = ""
+	}
 	c.ServeJSON()
 }
 

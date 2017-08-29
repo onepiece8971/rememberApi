@@ -100,6 +100,16 @@ func GetPostByUbIdPage(ubId uint32, page int) Posts {
 	return p
 }
 
+func GetPostByUbIdName(ubId uint32, name string) (Posts, error) {
+	o := orm.NewOrm()
+	p := Posts{UserBooksId: ubId, Name: name}
+	err := o.Read(&p, "user_books_id", "name")
+	if err != nil {
+		return p, err
+	}
+	return p, nil
+}
+
 func GetPostsByIds(ids []uint32) []*Posts {
 	o := orm.NewOrm()
 	var posts []*Posts
