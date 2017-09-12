@@ -28,5 +28,5 @@ var LevelMap = map[int]int{
 
 func init() {
 	// set default database
-	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("database") + "remember")
+	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("database") + beego.AppConfig.String("dataname"))
 }
