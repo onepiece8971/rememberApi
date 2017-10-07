@@ -115,9 +115,6 @@ func UpLevelById(id uint32, isForget bool) int64 {
 		if isForget {
 			recite.Level = 2
 		} else {
-			if recite.Level >= 9 {
-				return 1
-			}
 			recite.Level = recite.Level + 1
 			if recite.Level > 9 {
 				recite.Level = 9
